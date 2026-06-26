@@ -1,5 +1,5 @@
 {
-  "name": "Watery : Hydration Tracker",
+  "name": "Watery: Hydration Tracker",
   "short_name": "Watery",
   "description": "Calculate your daily water target, track intake, and get reminders to drink — based on body weight, activity, and climate.",
   "start_url": "./index.html",
