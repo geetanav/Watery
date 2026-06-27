@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Watery — Hydration</title>
+<meta name="theme-color" content="#0E1B2B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Watery">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap');
+:root{
+  --ink:#0E1B2B;--ink-soft:#16263A;--water:#3FA8C9;--water-deep:#2C84A0;
+  --sand:#F2EDE4;--teal:#5FC9A8;--amber:#E8A33D;
+  --line:rgba(242,237,228,0.12);--line-soft:rgba(242,237,228,0.06);
+  --text-dim:rgba(242,237,228,0.56);--text-faint:rgba(242,237,228,0.36);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;background:var(--ink);color:var(--sand);font-family:'Source Sans 3',sans-serif;-webkit-font-smoothing:antialiased;}
+.display{font-family:'Archivo',sans-serif;}
+button{font-family:inherit;-webkit-appearance:none;appearance:none;}
+input{font-family:inherit;}
+.app{max-width:480px;margin:0 auto;min-height:100vh;padding:28px 20px 100px;position:relative;}
+.eyebrow{font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--water);font-weight:600;margin:0 0 4px;}
+h1.brand{font-family:'Archivo',sans-serif;font-weight:800;font-size:26px;letter-spacing:-0.01em;margin:0 0 24px;display:flex;align-items:baseline;gap:8px;}
+h1.brand .sub{font-family:'Source Sans 3',sans-serif;font-weight:400;font-size:13px;color:var(--text-dim);}
+.tabs{display:flex;gap:4px;background:var(--ink-soft);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:24px;}
+.tab{flex:1;background:transparent;border:none;color:var(--text-dim);font-size:13px;font-weight:600;padding:9px 4px;border-radius:8px;cursor:pointer;transition:background 0.2s ease,color 0.2s ease;}
+.tab.active{background:var(--water);color:var(--ink);}
+.panel{display:none;}
+.panel.active{display:block;animation:fadein 0.25s ease;}
+@keyframes fadein{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+.vessel-wrap{display:flex;flex-direction:column;align-items:center;padding:8px 0 20px;}
+.vessel-svg{width:132px;height:200px;overflow:visible;}
+.vessel-readout{text-align:center;margin-top:14px;}
+.vessel-readout .amt{font-size:34px;font-weight:700;line-height:1;}
+.vessel-readout .amt span{font-size:16px;font-weight:500;color:var(--text-dim);}
+.vessel-readout .goal-line{font-size:12.5px;color:var(--text-dim);margin-top:6px;}
+.water-fill{transition:y 0.6s cubic-bezier(.4,0,.2,1),height 0.6s cubic-bezier(.4,0,.2,1);}
+.water-wave{animation:wave 3.2s ease-in-out infinite;}
+@keyframes wave{0%,100%{transform:translateX(0);}50%{transform:translateX(-6px);}}
+.card{background:var(--ink-soft);border:1px solid var(--line);border-radius:16px;padding:18px 18px 20px;margin-bottom:16px;}
+.card h2{font-family:'Archivo',sans-serif;font-size:14px;font-weight:700;letter-spacing:0.01em;margin:0 0 4px;}
+.card .desc{font-size:12.5px;color:var(--text-dim);margin:0 0 16px;line-height:1.5;}
+.quickadd{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
+.qbtn{background:var(--ink);border:1px solid var(--line);color:var(--sand);border-radius:10px;padding:12px 4px;font-size:13px;font-weight:600;cursor:pointer;transition:border-color 0.15s ease,transform 0.1s ease;}
+.qbtn:active{transform:scale(0.96);}
+.qbtn:hover{border-color:var(--water);}
+.custom-row{display:flex;gap:8px;}
+.custom-row input{flex:1;background:var(--ink);border:1px solid var(--line);color:var(--sand);border-radius:10px;padding:11px 12px;font-size:14px;}
+.custom-row input:focus{outline:none;border-color:var(--water);}
+.btn-primary{background:var(--water);color:var(--ink);border:none;border-radius:10px;padding:11px 18px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.btn-primary:active{transform:scale(0.97);}
+.undo-row{margin-top:10px;text-align:center;}
+.undo-link{background:none;border:none;color:var(--text-faint);font-size:12px;cursor:pointer;text-decoration:underline;}
+.log-list{display:flex;flex-direction:column;gap:6px;}
+.log-item{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--ink);border-radius:10px;font-size:13px;}
+.log-item .amt{font-weight:600;color:var(--teal);}
+.log-item .time{color:var(--text-faint);}
+.empty-state{font-size:12.5px;color:var(--text-faint);text-align:center;padding:18px 0 6px;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:12.5px;font-weight:600;color:var(--text-dim);margin-bottom:7px;}
+.unit-input{display:flex;background:var(--ink);border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+.unit-input input{flex:1;background:transparent;border:none;color:var(--sand);padding:11px 12px;font-size:15px;min-width:0;}
+.unit-input input:focus{outline:none;}
+.unit-input .unit{padding:11px 12px;font-size:13px;color:var(--text-dim);border-left:1px solid var(--line);display:flex;align-items:center;}
+.seg{display:flex;background:var(--ink);border:1px solid var(--line);border-radius:10px;padding:3px;}
+.seg button{flex:1;background:transparent;border:none;color:var(--text-dim);padding:9px 4px;font-size:12.5px;font-weight:600;border-radius:8px;cursor:pointer;}
+.seg button.active{background:var(--water-deep);color:var(--sand);}
+.activity-options{display:flex;flex-direction:column;gap:8px;}
+.opt{display:flex;align-items:flex-start;gap:10px;background:var(--ink);border:1px solid var(--line);border-radius:10px;padding:11px 12px;cursor:pointer;}
+.opt input{margin-top:2px;accent-color:var(--water);}
+.opt .opt-text strong{display:block;font-size:13px;font-weight:600;}
+.opt .opt-text span{font-size:11.5px;color:var(--text-faint);}
+.opt.checked{border-color:var(--water);}
+.calc-result{margin-top:18px;padding:18px;background:linear-gradient(135deg,var(--water-deep),var(--ink-soft));border-radius:14px;text-align:center;border:1px solid var(--line);}
+.calc-result .label{font-size:11.5px;text-transform:uppercase;letter-spacing:0.1em;color:rgba(242,237,228,0.7);margin-bottom:6px;}
+.calc-result .number{font-family:'Archivo',sans-serif;font-size:38px;font-weight:800;line-height:1;}
+.calc-result .number span{font-size:16px;font-weight:600;}
+.calc-result .note{font-size:12px;color:rgba(242,237,228,0.65);margin-top:8px;line-height:1.5;}
+.apply-btn{width:100%;margin-top:14px;background:var(--teal);color:var(--ink);border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;}
+.apply-btn:active{transform:scale(0.98);}
+.apply-confirm{text-align:center;font-size:12px;color:var(--teal);margin-top:8px;opacity:0;transition:opacity 0.3s ease;}
+.apply-confirm.show{opacity:1;}
+.reminder-row{display:flex;align-items:center;justify-content:space-between;background:var(--ink);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:8px;}
+.reminder-row .rtime{font-size:15px;font-weight:600;font-family:'Archivo',sans-serif;}
+.reminder-row .rmeta{font-size:11.5px;color:var(--text-faint);margin-top:2px;}
+.reminder-actions{display:flex;align-items:center;gap:10px;}
+.toggle{width:38px;height:22px;background:#233040;border-radius:999px;position:relative;cursor:pointer;border:1px solid var(--line);flex-shrink:0;}
+.toggle.on{background:var(--teal);border-color:var(--teal);}
+.toggle .knob{width:16px;height:16px;background:var(--sand);border-radius:50%;position:absolute;top:2px;left:2px;transition:left 0.2s ease;}
+.toggle.on .knob{left:18px;background:var(--ink);}
+.remove-btn{background:none;border:none;color:var(--text-faint);font-size:16px;cursor:pointer;padding:0 2px;line-height:1;}
+.remove-btn:hover{color:var(--amber);}
+.add-reminder-row{display:flex;gap:8px;margin-top:12px;}
+.add-reminder-row input[type="time"]{flex:1;background:var(--ink);border:1px solid var(--line);color:var(--sand);border-radius:10px;padding:10px 12px;font-size:14px;color-scheme:dark;}
+.add-reminder-row input:focus{outline:none;border-color:var(--water);}
+.interval-row{display:flex;gap:8px;align-items:center;background:var(--ink);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:12px;font-size:13px;flex-wrap:wrap;}
+.interval-row select{background:var(--ink-soft);color:var(--sand);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:13px;}
+.notice{font-size:11.5px;color:var(--text-faint);line-height:1.5;margin-top:14px;padding-top:14px;border-top:1px solid var(--line-soft);}
+.footnote{text-align:center;font-size:11px;color:var(--text-faint);margin-top:22px;line-height:1.6;padding:0 8px;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--amber);color:var(--ink);padding:12px 18px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.4);opacity:0;pointer-events:none;transition:opacity 0.3s ease,transform 0.3s ease;z-index:50;max-width:90%;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;}
+</style>
+</head>
+<body>
+<div class="app">
+  <p class="eyebrow">Hydration instrument</p>
+  <h1 class="brand">Watery <span class="sub">water, measured properly</span></h1>
+  <div class="tabs">
+    <button class="tab active" data-panel="track">Track</button>
+    <button class="tab" data-panel="calc">Calculate</button>
+    <button class="tab" data-panel="remind">Remind</button>
+  </div>
+  <!-- TRACK -->
+  <div class="panel active" id="panel-track">
+    <div class="vessel-wrap">
+      <svg class="vessel-svg" viewBox="0 0 132 200">
+        <defs>
+          <clipPath id="vesselClip">
+            <path d="M 30 8 L 102 8 L 96 188 Q 96 196 88 196 L 44 196 Q 36 196 36 188 Z"/>
+          </clipPath>
+          <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#5FC9A8"/>
+            <stop offset="100%" stop-color="#2C84A0"/>
+          </linearGradient>
+        </defs>
+        <path d="M 30 8 L 102 8 L 96 188 Q 96 196 88 196 L 44 196 Q 36 196 36 188 Z" fill="none" stroke="rgba(242,237,228,0.35)" stroke-width="2"/>
+        <line x1="30" y1="58" x2="38" y2="58" stroke="rgba(242,237,228,0.3)" stroke-width="1.5"/>
+        <line x1="30" y1="108" x2="38" y2="108" stroke="rgba(242,237,228,0.3)" stroke-width="1.5"/>
+        <line x1="30" y1="158" x2="38" y2="158" stroke="rgba(242,237,228,0.3)" stroke-width="1.5"/>
+        <g clip-path="url(#vesselClip)">
+          <rect id="waterFill" class="water-fill" x="30" y="196" width="72" height="0" fill="url(#waterGrad)"/>
+          <path id="waterWave" class="water-wave" d="M 20 0 Q 33 -4 46 0 T 72 0 T 98 0 T 124 0 V 10 H 20 Z" fill="rgba(242,237,228,0.18)"/>
+        </g>
+        <ellipse cx="66" cy="8" rx="36" ry="4" fill="none" stroke="rgba(242,237,228,0.45)" stroke-width="2"/>
+      </svg>
+      <div class="vessel-readout">
+        <div class="amt"><span id="currentAmt">0</span><span> / <span id="goalAmt">2000</span> ml</span></div>
+        <div class="goal-line" id="goalPct">0% of today's goal</div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Log intake</h2>
+      <p class="desc">Tap an amount or enter your own.</p>
+      <div class="quickadd">
+        <button class="qbtn" data-add="150">150 ml<br><span style="font-weight:400;color:var(--text-faint);font-size:10.5px">small glass</span></button>
+        <button class="qbtn" data-add="250">250 ml<br><span style="font-weight:400;color:var(--text-faint);font-size:10.5px">glass</span></button>
+        <button class="qbtn" data-add="350">350 ml<br><span style="font-weight:400;color:var(--text-faint);font-size:10.5px">bottle</span></button>
+        <button class="qbtn" data-add="500">500 ml<br><span style="font-weight:400;color:var(--text-faint);font-size:10.5px">large bottle</span></button>
+      </div>
+      <div class="custom-row">
+        <input type="number" id="customAmt" placeholder="Custom amount (ml)" min="1">
+        <button class="btn-primary" id="addCustomBtn">Add</button>
+      </div>
+      <div class="undo-row" id="undoRow" style="display:none;">
+        <button class="undo-link" id="undoBtn">Undo last entry</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Today's log</h2>
+      <div class="log-list" id="logList"><p class="empty-state">Nothing logged yet today.</p></div>
+    </div>
+  </div>
+  <!-- CALCULATE -->
+  <div class="panel" id="panel-calc">
+    <div class="card">
+      <h2>Daily target calculator</h2>
+      <p class="desc">Based on body weight, activity, and climate.</p>
+      <div class="field">
+        <label>Units</label>
+        <div class="seg" id="unitSeg">
+          <button class="active" data-unit="metric">Metric (kg)</button>
+          <button data-unit="imperial">Imperial (lb)</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="weightInput">Body weight</label>
+        <div class="unit-input">
+          <input type="number" id="weightInput" placeholder="e.g. 70" min="1">
+          <span class="unit" id="weightUnit">kg</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Activity level</label>
+        <div class="activity-options" id="activityOptions">
+          <label class="opt checked"><input type="radio" name="activity" value="0" checked><span class="opt-text"><strong>Sedentary</strong><span>Little to no exercise</span></span></label>
+          <label class="opt"><input type="radio" name="activity" value="350"><span class="opt-text"><strong>Lightly active</strong><span>Light exercise 1–3 days/week</span></span></label>
+          <label class="opt"><input type="radio" name="activity" value="700"><span class="opt-text"><strong>Active</strong><span>Moderate exercise most days</span></span></label>
+          <label class="opt"><input type="radio" name="activity" value="1200"><span class="opt-text"><strong>Very active</strong><span>Intense training or manual labor daily</span></span></label>
+        </div>
+      </div>
+      <div class="field">
+        <label>Climate</label>
+        <div class="seg" id="climateSeg">
+          <button class="active" data-climate="0">Temperate</button>
+          <button data-climate="350">Hot / humid</button>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label class="opt" style="display:flex;"><input type="checkbox" id="pregnantCheck"><span class="opt-text"><strong>Pregnant or breastfeeding</strong><span>Adds to fluid needs</span></span></label>
+      </div>
+      <div class="calc-result">
+        <div class="label">Suggested daily intake</div>
+        <div class="number" id="calcNumber">0<span> ml</span></div>
+        <div class="note" id="calcNote">Enter your weight to calculate.</div>
+      </div>
+      <button class="apply-btn" id="applyGoalBtn">Set as today's goal</button>
+      <div class="apply-confirm" id="applyConfirm">Goal updated — check the Track tab.</div>
+      <p class="notice">This is a general estimate, not medical advice.</p>
+    </div>
+  </div>
+  <!-- REMIND -->
+  <div class="panel" id="panel-remind">
+    <div class="card">
+      <h2>Reminder schedule</h2>
+      <p class="desc">Install Watery to your home screen and allow notifications — reminders will fire even when the app is closed.</p>
+      <div id="reminderList"></div>
+      <div class="add-reminder-row">
+        <input type="time" id="newReminderTime" value="09:00">
+        <button class="btn-primary" id="addReminderBtn">Add</button>
+      </div>
+      <div class="interval-row">
+        <span>Auto-space</span>
+        <select id="intervalCount"><option value="0">Off</option><option value="4">4</option><option value="6">6</option><option value="8">8</option></select>
+        <span>reminders between</span>
+        <select id="wakeHour"><option value="7">7am</option><option value="8" selected>8am</option><option value="9">9am</option></select>
+        <span>–</span>
+        <select id="sleepHour"><option value="21">9pm</option><option value="22" selected>10pm</option><option value="23">11pm</option></select>
+      </div>
+    </div>
+  </div>
+  <p class="footnote">Watery gives general hydration guidance based on weight, activity, and climate. It is not a substitute for medical advice.</p>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Inline service worker via Blob ──────────────────────────
+const SW_CODE = `
+const CACHE='watery-v1';
+const ASSETS=['./'];
+self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)));self.skipWaiting();});
+self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim();});
+self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));});
+let reminders=[],firedToday={},checkTimer=null;
+function todayKey(){return new Date().toISOString().slice(0,10);}
+function checkReminders(){
+  const now=new Date();
+  const hh=String(now.getHours()).padStart(2,'0');
+  const mm=String(now.getMinutes()).padStart(2,'0');
+  const current=hh+':'+mm;
+  const day=todayKey();
+  reminders.forEach(r=>{
+    if(!r.on)return;
+    if(r.time!==current)return;
+    const fk=r.id+'_'+day;
+    if(firedToday[fk])return;
+    firedToday[fk]=true;
+    self.registration.showNotification('Watery',{body:'Time to drink some water',icon:'./icon-192.png',tag:r.id,renotify:true});
+  });
+}
+function startTimer(){if(checkTimer)clearInterval(checkTimer);checkTimer=setInterval(checkReminders,30000);checkReminders();}
+self.addEventListener('message',e=>{if(e.data&&e.data.type==='SET_REMINDERS'){reminders=e.data.reminders||[];startTimer();}});
+self.addEventListener('notificationclick',e=>{e.notification.close();e.waitUntil(self.clients.matchAll({type:'window'}).then(cs=>{for(const c of cs){if('focus'in c)return c.focus();}if(self.clients.openWindow)return self.clients.openWindow('./');})  );});
+startTimer();
+`;
+
+// ── Inline manifest via Blob ────────────────────────────────
+const MANIFEST = {
+  name: "Watery: Hydration Tracker",
+  short_name: "Watery",
+  description: "Calculate your daily water goal, track intake, and get reminded to drink — based on body weight, activity, and climate.",
+  start_url: "./",
+  scope: "./",
+  display: "standalone",
+  orientation: "portrait",
+  background_color: "#0E1B2B",
+  theme_color: "#0E1B2B",
+  icons: [
+    {src:"./icon-192.png",sizes:"192x192",type:"image/png",purpose:"any"},
+    {src:"./icon-512.png",sizes:"512x512",type:"image/png",purpose:"any"},
+    {src:"./icon-maskable-192.png",sizes:"192x192",type:"image/png",purpose:"maskable"},
+    {src:"./icon-maskable-512.png",sizes:"512x512",type:"image/png",purpose:"maskable"}
+  ]
+};
+
+(function(){
+  // Inject manifest link
+  const mBlob = new Blob([JSON.stringify(MANIFEST)],{type:'application/manifest+json'});
+  const mUrl = URL.createObjectURL(mBlob);
+  const mLink = document.createElement('link');
+  mLink.rel = 'manifest'; mLink.href = mUrl;
+  document.head.appendChild(mLink);
+
+  // Register service worker via Blob
+  if('serviceWorker' in navigator){
+    const swBlob = new Blob([SW_CODE],{type:'application/javascript'});
+    const swUrl = URL.createObjectURL(swBlob);
+    navigator.serviceWorker.register(swUrl,{scope:'./'})
+      .then(()=>syncRemindersToSW())
+      .catch(e=>console.warn('SW registration failed',e));
+  }
+
+  // ── State ──────────────────────────────────────────────────
+  const todayKey=()=>new Date().toISOString().slice(0,10);
+  const state={goal:2000,entries:[],lastEntryDay:todayKey(),reminders:[],lastFired:{}};
+
+  function load(){
+    try{const r=localStorage.getItem('watery_state');if(r)Object.assign(state,JSON.parse(r));}catch(e){}
+    if(state.lastEntryDay!==todayKey()){state.entries=[];state.lastEntryDay=todayKey();save();}
+    if(!state.reminders||state.reminders.length===0){
+      state.reminders=[
+        {id:'r1',time:'09:00',on:true},{id:'r2',time:'13:00',on:true},
+        {id:'r3',time:'17:00',on:true},{id:'r4',time:'20:00',on:true}
+      ];
+    }
+  }
+  function save(){try{localStorage.setItem('watery_state',JSON.stringify(state));}catch(e){}}
+
+  function syncRemindersToSW(){
+    if(navigator.serviceWorker&&navigator.serviceWorker.controller){
+      navigator.serviceWorker.controller.postMessage({type:'SET_REMINDERS',reminders:state.reminders});
+    } else if(navigator.serviceWorker){
+      navigator.serviceWorker.ready.then(r=>{if(r.active)r.active.postMessage({type:'SET_REMINDERS',reminders:state.reminders});});
+    }
+  }
+
+  // ── Tabs ───────────────────────────────────────────────────
+  document.querySelectorAll('.tab').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-'+tab.dataset.panel).classList.add('active');
+    });
+  });
+
+  // ── Vessel / Track ─────────────────────────────────────────
+  const waterFill=document.getElementById('waterFill');
+  const waterWave=document.getElementById('waterWave');
+  const VESSEL_TOP=8,VESSEL_BOTTOM=196,VESSEL_H=VESSEL_BOTTOM-VESSEL_TOP;
+
+  function renderTrack(){
+    const total=state.entries.reduce((s,e)=>s+e.amt,0);
+    const pct=Math.max(0,Math.min(1,total/state.goal));
+    document.getElementById('currentAmt').textContent=total;
+    document.getElementById('goalAmt').textContent=state.goal;
+    document.getElementById('goalPct').textContent=Math.round(pct*100)+"% of today's goal";
+    const fillH=pct*VESSEL_H;
+    waterFill.setAttribute('y',VESSEL_BOTTOM-fillH);
+    waterFill.setAttribute('height',fillH);
+    waterWave.setAttribute('transform',`translate(0,${-fillH})`);
+    const list=document.getElementById('logList');
+    if(state.entries.length===0){list.innerHTML='<p class="empty-state">Nothing logged yet today.</p>';}
+    else{list.innerHTML=state.entries.slice().reverse().map(e=>`<div class="log-item"><span class="amt">+${e.amt} ml</span><span class="time">${e.time}</span></div>`).join('');}
+    document.getElementById('undoRow').style.display=state.entries.length?'block':'none';
+  }
+
+  function addEntry(amt){
+    if(state.lastEntryDay!==todayKey()){state.entries=[];state.lastEntryDay=todayKey();}
+    const now=new Date();
+    state.entries.push({amt,time:now.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}),ts:now.getTime()});
+    save();renderTrack();
+  }
+
+  document.querySelectorAll('.qbtn').forEach(btn=>btn.addEventListener('click',()=>addEntry(parseInt(btn.dataset.add,10))));
+  document.getElementById('addCustomBtn').addEventListener('click',()=>{
+    const input=document.getElementById('customAmt');
+    const val=parseInt(input.value,10);
+    if(val&&val>0){addEntry(val);input.value='';}
+  });
+  document.getElementById('customAmt').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('addCustomBtn').click();});
+  document.getElementById('undoBtn').addEventListener('click',()=>{state.entries.pop();save();renderTrack();});
+
+  // ── Calculator ─────────────────────────────────────────────
+  let units='metric';
+  document.querySelectorAll('#unitSeg button').forEach(btn=>btn.addEventListener('click',()=>{
+    document.querySelectorAll('#unitSeg button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');units=btn.dataset.unit;
+    document.getElementById('weightUnit').textContent=units==='metric'?'kg':'lb';runCalc();
+  }));
+  document.querySelectorAll('#climateSeg button').forEach(btn=>btn.addEventListener('click',()=>{
+    document.querySelectorAll('#climateSeg button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');runCalc();
+  }));
+  document.querySelectorAll('input[name="activity"]').forEach(radio=>radio.addEventListener('change',()=>{
+    document.querySelectorAll('.opt').forEach(o=>o.classList.remove('checked'));
+    radio.closest('.opt').classList.add('checked');runCalc();
+  }));
+  document.getElementById('weightInput').addEventListener('input',runCalc);
+  document.getElementById('pregnantCheck').addEventListener('change',runCalc);
+
+  function runCalc(){
+    const wInput=parseFloat(document.getElementById('weightInput').value);
+    const numberEl=document.getElementById('calcNumber');
+    const noteEl=document.getElementById('calcNote');
+    if(!wInput||wInput<=0){numberEl.innerHTML='0<span> ml</span>';noteEl.textContent='Enter your weight to calculate.';return;}
+    const weightKg=units==='metric'?wInput:wInput*0.453592;
+    let total=weightKg*33+parseInt(document.querySelector('input[name="activity"]:checked').value,10)+parseInt(document.querySelector('#climateSeg button.active').dataset.climate,10);
+    if(document.getElementById('pregnantCheck').checked)total+=300;
+    total=Math.round(total/50)*50;
+    numberEl.innerHTML=total.toLocaleString()+'<span> ml</span>';
+    noteEl.textContent=`Roughly ${Math.round(total/250)} cups (250 ml) across the day. Includes water from food and drinks.`;
+  }
+
+  document.getElementById('applyGoalBtn').addEventListener('click',()=>{
+    const val=parseInt(document.getElementById('calcNumber').firstChild.textContent.replace(/,/g,''),10);
+    if(val&&val>0){state.goal=val;save();renderTrack();const c=document.getElementById('applyConfirm');c.classList.add('show');setTimeout(()=>c.classList.remove('show'),2200);}
+  });
+
+  // ── Reminders ──────────────────────────────────────────────
+  function renderReminders(){
+    const list=document.getElementById('reminderList');
+    if(state.reminders.length===0){list.innerHTML='<p class="empty-state">No reminders set.</p>';return;}
+    const sorted=state.reminders.slice().sort((a,b)=>a.time.localeCompare(b.time));
+    list.innerHTML=sorted.map(r=>{
+      const[h,m]=r.time.split(':').map(Number);
+      const d=new Date();d.setHours(h,m,0,0);
+      const display=d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+      return`<div class="reminder-row" data-id="${r.id}"><div><div class="rtime">${display}</div><div class="rmeta">Drink water reminder</div></div><div class="reminder-actions"><div class="toggle ${r.on?'on':''}" data-toggle="${r.id}"><div class="knob"></div></div><button class="remove-btn" data-remove="${r.id}">✕</button></div></div>`;
+    }).join('');
+    list.querySelectorAll('[data-toggle]').forEach(el=>el.addEventListener('click',()=>{
+      const r=state.reminders.find(x=>x.id===el.dataset.toggle);r.on=!r.on;save();renderReminders();syncRemindersToSW();
+    }));
+    list.querySelectorAll('[data-remove]').forEach(el=>el.addEventListener('click',()=>{
+      state.reminders=state.reminders.filter(x=>x.id!==el.dataset.remove);save();renderReminders();syncRemindersToSW();
+    }));
+  }
+
+  document.getElementById('addReminderBtn').addEventListener('click',()=>{
+    const time=document.getElementById('newReminderTime').value;
+    if(!time)return;
+    state.reminders.push({id:'r'+Date.now(),time,on:true});
+    save();renderReminders();syncRemindersToSW();
+    if('Notification'in window&&Notification.permission==='default')Notification.requestPermission();
+  });
+
+  document.getElementById('intervalCount').addEventListener('change',applyInterval);
+  document.getElementById('wakeHour').addEventListener('change',applyInterval);
+  document.getElementById('sleepHour').addEventListener('change',applyInterval);
+
+  function applyInterval(){
+    const count=parseInt(document.getElementById('intervalCount').value,10);
+    if(!count)return;
+    const wake=parseInt(document.getElementById('wakeHour').value,10);
+    const sleep=parseInt(document.getElementById('sleepHour').value,10);
+    if(sleep<=wake)return;
+    const span=sleep-wake,step=span/(count-1||1);
+    state.reminders=Array.from({length:count},(_,i)=>{
+      const hf=wake+step*i,h=Math.floor(hf),m=Math.round((hf-h)*60);
+      return{id:'auto'+i,time:String(h).padStart(2,'0')+':'+String(m).padStart(2,'0'),on:true};
+    });
+    save();renderReminders();syncRemindersToSW();
+  }
+
+  // ── In-app toast reminders ─────────────────────────────────
+  const toast=document.getElementById('toast');
+  function showToast(msg){toast.textContent=msg;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),4000);}
+
+  function checkReminders(){
+    const now=new Date();
+    const current=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    const day=todayKey();
+    state.reminders.forEach(r=>{
+      if(!r.on)return;
+      if(r.time!==current)return;
+      const fk=r.id+'_'+day;
+      if(state.lastFired[fk])return;
+      state.lastFired[fk]=true;save();
+      showToast('Time to drink some water');
+    });
+  }
+  setInterval(checkReminders,20000);
+
+  // ── Init ───────────────────────────────────────────────────
+  load();renderTrack();renderReminders();runCalc();syncRemindersToSW();
+})();
+</script>
+</body>
+          </html>
